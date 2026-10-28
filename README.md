@@ -2,6 +2,10 @@
 
 An interactive companion for the 14-slide, eight-presenter introduction to a single qubit.
 
+## Live deployment
+
+[Open Qubit Studio on Vercel](https://qubit-studio-five.vercel.app/)
+
 ## Run locally
 
 ```powershell
@@ -19,8 +23,8 @@ server, so Vercel does not need a server function or a database.
 
 1. Push this folder to a GitHub, GitLab, or Bitbucket repository.
 2. In the [Vercel dashboard](https://vercel.com/new), import that repository.
-3. Leave the framework preset as **Other** and leave the build command and output
-   directory empty.
+3. Set the framework preset to **Other**, leave the build command empty, and set
+   the output directory to `public`.
 4. Click **Deploy**.
 
 Vercel will serve `index.html` at the deployment URL and the browser will load
@@ -32,6 +36,10 @@ For a command-line deployment after signing in to Vercel:
 ```powershell
 npx vercel --prod
 ```
+
+The production project is named `qubit-studio` in the `aayushgoel1607` Vercel
+scope. Its stable production alias is
+`https://qubit-studio-five.vercel.app/`.
 
 ## What it covers
 
