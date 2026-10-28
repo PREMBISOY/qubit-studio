@@ -2,7 +2,8 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
 
-const root = process.cwd();
+// Serve the same production bundle used by Vercel.
+const root = join(process.cwd(), 'public');
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8' };
 createServer(async (req, res) => {
   const requested = req.url === '/' ? '/index.html' : decodeURIComponent(req.url.split('?')[0]);
