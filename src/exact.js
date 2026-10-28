@@ -1,0 +1,23 @@
+export class ExactSimulator {
+  constructor(n, random = Math.random) { if (n < 1 || n > 12) throw new Error('Exact mode supports 1–12 qubits.'); this.n = n; this.random = random; this.state = new Float64Array(2 * (1 << n)); this.state[0] = 1; }
+  assertQ(q) { if (!Number.isInteger(q) || q < 0 || q >= this.n) throw new Error(`Invalid qubit q${q}`); }
+  pair(q, a, b) { this.assertQ(q); const bit = 1 << q, size = 1 << this.n; for (let base = 0; base < size; base++) if (!(base & bit)) { const j = base | bit; const ar = this.state[2 * base], ai = this.state[2 * base + 1], br = this.state[2 * j], bi = this.state[2 * j + 1]; const [cr, ci, dr, di] = a(ar, ai, br, bi); this.state[2 * base] = cr; this.state[2 * base + 1] = ci; this.state[2 * j] = dr; this.state[2 * j + 1] = di; } }
+  h(q) { const s = Math.SQRT1_2; this.pair(q, (ar, ai, br, bi) => [(ar + br) * s, (ai + bi) * s, (ar - br) * s, (ai - bi) * s]); }
+  xGate(q) { this.pair(q, (ar, ai, br, bi) => [br, bi, ar, ai]); }
+  y(q) { this.pair(q, (ar, ai, br, bi) => [bi, -br, -ai, ar]); }
+  zGate(q) { this.pair(q, (ar, ai, br, bi) => [ar, ai, -br, -bi]); }
+  s(q) { this.pair(q, (ar, ai, br, bi) => [ar, ai, -bi, br]); }
+  t(q) { const s = Math.SQRT1_2; this.pair(q, (ar, ai, br, bi) => [ar, ai, (br - bi) * s, (br + bi) * s]); }
+  rx(q, angle) { const c = Math.cos(angle / 2), s = Math.sin(angle / 2); this.pair(q, (ar, ai, br, bi) => [c * ar + s * bi, c * ai - s * br, c * br + s * ai, c * bi - s * ar]); }
+  ry(q, angle) { const c = Math.cos(angle / 2), s = Math.sin(angle / 2); this.pair(q, (ar, ai, br, bi) => [c * ar - s * br, c * ai - s * bi, s * ar + c * br, s * ai + c * bi]); }
+  rz(q, angle) { const c = Math.cos(angle / 2), s = Math.sin(angle / 2); this.pair(q, (ar, ai, br, bi) => [c * ar + s * ai, c * ai - s * ar, c * br - s * bi, c * bi + s * br]); }
+  cnot(c, t) { this.assertQ(c); this.assertQ(t); const cb = 1 << c, tb = 1 << t, size = 1 << this.n; for (let i = 0; i < size; i++) if ((i & cb) && !(i & tb)) { const j = i | tb; [this.state[2 * i], this.state[2 * j]] = [this.state[2 * j], this.state[2 * i]]; [this.state[2 * i + 1], this.state[2 * j + 1]] = [this.state[2 * j + 1], this.state[2 * i + 1]]; } }
+  cz(a, b) { this.assertQ(a); this.assertQ(b); const mask = (1 << a) | (1 << b), size = 1 << this.n; for (let i = 0; i < size; i++) if ((i & mask) === mask) { this.state[2 * i] *= -1; this.state[2 * i + 1] *= -1; } }
+  swap(a, b) { this.cnot(a, b); this.cnot(b, a); this.cnot(a, b); }
+  probabilityOne(q) { const bit = 1 << q, size = 1 << this.n; let p = 0; for (let i = 0; i < size; i++) if (i & bit) p += this.state[2 * i] ** 2 + this.state[2 * i + 1] ** 2; return p; }
+  blochVector(q) { this.assertQ(q); const bit = 1 << q, size = 1 << this.n; let z = 0, offRe = 0, offIm = 0; for (let i = 0; i < size; i++) if (!(i & bit)) { const j = i | bit, ar = this.state[2 * i], ai = this.state[2 * i + 1], br = this.state[2 * j], bi = this.state[2 * j + 1]; z += ar * ar + ai * ai - br * br - bi * bi; offRe += ar * br + ai * bi; offIm += ar * bi - ai * br; } return { x: 2 * offRe, y: 2 * offIm, z, radius: Math.hypot(2 * offRe, 2 * offIm, z), rho01: { re: offRe, im: offIm } }; }
+  measure(q) { const p1 = this.probabilityOne(q), outcome = this.random() < p1 ? 1 : 0, keep = outcome ? p1 : 1 - p1; const bit = 1 << q, size = 1 << this.n, scale = keep ? 1 / Math.sqrt(keep) : 0; for (let i = 0; i < size; i++) if (Boolean(i & bit) !== Boolean(outcome)) { this.state[2 * i] = 0; this.state[2 * i + 1] = 0; } else { this.state[2 * i] *= scale; this.state[2 * i + 1] *= scale; } return outcome; }
+  reset(q) { if (this.measure(q)) this.xGate(q); }
+  amplitudes(limit = 16) { const size = 1 << this.n; return Array.from({ length: Math.min(limit, size) }, (_, i) => ({ basis: `|${i.toString(2).padStart(this.n, '0')}⟩`, re: this.state[2 * i], im: this.state[2 * i + 1], p: this.state[2 * i] ** 2 + this.state[2 * i + 1] ** 2 })); }
+  apply(g) { const t = g.targets || [], c = g.controls || [], angle = Number(g.angle ?? 0); if (g.name === 'H') this.h(t[0]); else if (g.name === 'X') this.xGate(t[0]); else if (g.name === 'Y') this.y(t[0]); else if (g.name === 'Z') this.zGate(t[0]); else if (g.name === 'S') this.s(t[0]); else if (g.name === 'T') this.t(t[0]); else if (g.name === 'RX') this.rx(t[0], angle); else if (g.name === 'RY') this.ry(t[0], angle); else if (g.name === 'RZ') this.rz(t[0], angle); else if (g.name === 'CNOT') this.cnot(c[0], t[0]); else if (g.name === 'CZ') this.cz(c[0], t[0]); else if (g.name === 'SWAP') this.swap(t[0], t[1]); else if (g.name === 'RESET') this.reset(t[0]); else if (g.name === 'MEASURE') return this.measure(t[0]); else throw new Error(`Unsupported exact gate ${g.name}`); }
+}

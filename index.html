@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Qubit Studio — interactive presentation lab</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./ppt-theme.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="site-header">
+        <div class="brand"><span class="brand-mark">ψ</span><div><p class="eyebrow">INTERACTIVE QUANTUM PRESENTATION</p><h1>Qubit Studio</h1></div></div>
+        <p>One qubit, from state vectors to decoherence.</p>
+      </header>
+      <section class="lab" aria-labelledby="lab-title">
+        <div class="section-heading"><div><p class="eyebrow">LIVE ONE-QUBIT LAB</p><h2 id="lab-title">Prepare, rotate, measure, and let it decohere</h2></div><p id="lab-context">Start at |0⟩ and try the Hadamard gate.</p></div>
+        <div class="lab-grid">
+          <section class="controls" aria-label="Qubit controls">
+            <h3>State preparation</h3><div class="preset-row"><button data-preset="zero" type="button">|0⟩</button><button data-preset="one" type="button">|1⟩</button><button data-preset="plus" type="button">|+⟩</button><button data-preset="minus" type="button">|−⟩</button></div>
+            <label>Polar angle θ <output id="theta-value">0°</output><input id="theta" type="range" min="0" max="180" value="0" /></label><label>Phase φ <output id="phi-value">0°</output><input id="phi" type="range" min="0" max="360" value="0" /></label>
+            <hr /><h3>Gate rotations</h3><div class="gate-row"><button data-gate="H" type="button">Hadamard (H)</button><button data-gate="X" type="button">X</button><button data-gate="Y" type="button">Y</button><button data-gate="Z" type="button">Z</button></div>
+            <hr /><h3>Decoherence</h3><label>Evolution time <output id="time-value">0 µs</output><input id="time" type="range" min="0" max="240" value="0" /></label><div class="two-controls"><label>T<sub>1</sub><input id="t1" type="number" min="20" max="1000" value="180" /> µs</label><label>T<sub>2</sub><input id="t2" type="number" min="10" max="1000" value="110" /> µs</label></div>
+          </section>
+          <section class="sphere-card" aria-label="Bloch sphere">
+            <div class="sphere-heading"><h3>Bloch sphere</h3><span id="state-badge">Pure state</span></div>
+            <svg id="bloch-sphere" viewBox="0 0 360 320" role="img" aria-labelledby="bloch-title bloch-desc"><title id="bloch-title">Current qubit on the Bloch sphere</title><desc id="bloch-desc">The state vector updates as the controls are changed.</desc><defs><linearGradient id="orb" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#17283e"/><stop offset="1" stop-color="#0d1626"/></linearGradient></defs><circle cx="180" cy="160" r="112" class="sphere"/><ellipse cx="180" cy="160" rx="112" ry="36" class="sphere-line"/><path d="M180 48V272M68 160H292" class="sphere-line"/><path id="state-line" class="state-line" d="M180 160 L180 48"/><circle id="state-dot" class="state-dot" cx="180" cy="48" r="8"/><text x="192" y="43">|0⟩</text><text x="192" y="290">|1⟩</text><text x="299" y="155">x</text><text x="221" y="108">y</text><text x="188" y="96">z</text></svg>
+            <p id="state-reading" class="state-reading"></p>
+          </section>
+          <section class="readout" aria-label="Measurement readout">
+            <h3>Measurement readout</h3><div class="probability"><div class="prob-head"><span>P(0)</span><strong id="p-zero">100%</strong></div><div class="track"><i id="bar-zero"></i></div></div><div class="probability"><div class="prob-head"><span>P(1)</span><strong id="p-one">0%</strong></div><div class="track"><i id="bar-one"></i></div></div><button id="measure" class="primary measure" type="button">Measure 200 shots</button><div id="measurement-result" class="measurement-result" aria-live="polite">No measurements yet.</div><hr />
+            <dl class="state-metrics"><div><dt>⟨σ<sub>x</sub>⟩</dt><dd id="rx">0.000</dd></div><div><dt>⟨σ<sub>y</sub>⟩</dt><dd id="ry">0.000</dd></div><div><dt>⟨σ<sub>z</sub>⟩</dt><dd id="rz">1.000</dd></div><div><dt>Purity</dt><dd id="purity">1.000</dd></div></dl>
+          </section>
+        </div>
+      </section>
+      <section class="hardware" aria-labelledby="hardware-title">
+        <div class="section-heading"><div><p class="eyebrow">SLIDE 13 · PHYSICAL QUBITS</p><h2 id="hardware-title">Different hardware, different trade-offs</h2></div><p>Indicative ranges — real devices vary.</p></div>
+        <div class="hardware-grid"><article><h3>Superconducting transmon</h3><p><strong>Coherence:</strong> tens–hundreds of µs</p><p><strong>Gates:</strong> tens of ns</p></article><article><h3>Trapped ion</h3><p><strong>Coherence:</strong> seconds or more</p><p><strong>Gates:</strong> slower</p></article><article><h3>Silicon spin</h3><p><strong>Coherence:</strong> around ms</p><p><strong>Gates:</strong> intermediate</p></article><article><h3>Photon</h3><p><strong>Strength:</strong> no energy decay in flight</p><p><strong>Challenge:</strong> loss</p></article></div>
+      </section>
+    </main>
+    <script src="./src/app.js"></script>
+  </body>
+</html>

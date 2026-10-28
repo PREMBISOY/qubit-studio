@@ -1,0 +1,13 @@
+/* Exact core colors extracted from the presentation deck. */
+:root {
+  --bg: #1A1536;
+  --ink: #FFFFFF;
+  --cyan: #7E56FF;
+  --violet: #897DCD;
+  --amber: #897DCD;
+  --blue: #897DCD;
+  --line: #897DCD;
+}
+
+#bloch-sphere stop:first-child { stop-color: #30265C; }
+#bloch-sphere stop:last-child { stop-color: #1A1536; }
